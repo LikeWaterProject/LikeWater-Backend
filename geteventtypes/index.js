@@ -1,16 +1,35 @@
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+const sql = require("mssql");
 
-    if (req.query.name || (req.body && req.body.name)) {
-        context.res = {
-            // status: 200, /* Defaults to 200 */
-            body: "Hello " + (req.query.name || req.body.name)
-        };
-    }
-    else {
-        context.res = {
-            status: 400,
-            body: "Please pass a name on the query string or in the request body"
-        };
-    }
+const sqlConfig = {
+  user: process.env.dbuser,
+  password: process.env.dbpassword,
+  server: process.env.dbserver,
+  database: process.env.database,
+};
+
+async function getSqlData() {
+  let sqlQuery = `select eventType, description from EventTypes where showInApp = 1`;
+
+  let pool = await sql.connect(sqlConfig)
+  // let result1 = await pool.request()
+  //     .input('input_parameter', sql.Int, value)
+  //     .query('select * from mytable where id = @input_parameter')
+  let result = await pool.request()
+      .query(sqlQuery);
+      
+  // console.dir(result1)
+  
+  return result.recordset;
+}
+
+module.exports = async function (context, req) {
+  dbResults = await getSqlData();
+
+  context.res = {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dbResults)
+  }
 };
