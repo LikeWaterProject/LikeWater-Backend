@@ -7,12 +7,17 @@ const sqlConfig = {
   database: process.env.database,
 };
 
-async function writeConfirm(eventId, userToken) {
-  try {
-    let currentTimestamp = Math.round(new Date().getTime() / 1000);
+async function writeConfirm(eventId, userToken, isActive) {
+  let finalIsActive = 0
+  if(typeof isActive === "boolean") {
+    if(isActive) finalIsActive = 1;
+  }
 
-    let sqlQuery = `INSERT INTO EventConfirms(eventId, userToken, confirmedDt)
-          VALUES(N'${eventId}', N'${userToken}', ${currentTimestamp})`;
+  try {
+    let currentTimestamp = Date.now();
+
+    let sqlQuery = `INSERT INTO EventResponses(eventId, userToken, reportedActive, responseDt)
+          VALUES(N'${eventId}', N'${userToken}', ${finalIsActive}, ${currentTimestamp})`;
 
     let pool = await sql.connect(sqlConfig);
     let result = await pool.request().query(sqlQuery);
@@ -28,7 +33,7 @@ module.exports = async function (context, req) {
 
   if (req.method == "POST") {
 
-    let recordsCreated = writeConfirm(req.body.eventId, req.body.userToken)
+    let recordsCreated = writeConfirm(req.body.eventId, req.body.userToken, req.body.eventActive);
 
     if(recordsCreated) {
         context.res = {
