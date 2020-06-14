@@ -16,22 +16,26 @@ async function fetchEventDetails(eventId) {
         WHERE Events.eventId = @eventId
         GROUP BY Events.eventId, Events.eventType, Events.userToken, Events.eventDesc, Events.lat, Events.lon, Events.reportedDt;
     `;
-    let pool = await sql.connect(sqlConfig);
+    let record;
+    try {
+        const pool = await sql.connect(sqlConfig);
 
-
-    const ps = new sql.PreparedStatement(pool);
-    ps.input("eventId", sql.UniqueIdentifier);
-    await ps.prepare(query);
-    let result = await ps.execute({
-        eventId
-    });
-    ps.unprepare();
-
-    if (result.recordset.length > 0) {
-        return result.recordset[0];
-    } else {
-        return {};
+        const ps = new sql.PreparedStatement(pool);
+        ps.input("eventId", sql.UniqueIdentifier);
+        await ps.prepare(query);
+        const result = await ps.execute({
+            eventId
+        });
+        ps.unprepare();
+        if (result.recordset.length > 0) {
+            record = result.recordset[0];
+        } else {
+            record = {};
+        }
+    } catch (err) {
+        throw err;
     }
+    return record;
 }
 
 module.exports = async function (context, req) {
@@ -40,13 +44,23 @@ module.exports = async function (context, req) {
         context.res = {
             status: 400,
             body: {
-                message: "No eventId provided"
+                error: "No eventId provided"
             }
         };
         return;
     }
-
-    dbResults = await fetchEventDetails(eventId);
+    let dbResults;
+    try {
+        dbResults = await fetchEventDetails(eventId);
+    } catch (err) {
+        context.res = {
+            status: 500,
+            body: {
+                error: "Internal error",
+            }
+        }
+        return;
+    }
     if (dbResults.lat) {
         dbResults.coordinates = {
             lat: dbResults.lat,
