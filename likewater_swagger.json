@@ -9,15 +9,21 @@
   "host": "likewater-internal.azurewebsites.net",
   "basePath": "/api",
   "tags": [],
-  "schemes": ["https"],
+  "schemes": [
+    "https"
+  ],
   "paths": {
     "/geteventtypes": {
       "get": {
-        "tags": ["eventTypes"],
+        "tags": [
+          "eventTypes"
+        ],
         "summary": "Get Event Types",
         "description": "Gets the list of available Event Types that are reportable",
         "operationId": "geteventtypes",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -39,60 +45,76 @@
     },
     "/reportevent": {
       "post": {
-        "tags": ["report"],
+        "tags": [
+          "report"
+        ],
         "summary": "Report an event",
         "description": "Report an event for display to other users on the local map",
         "operationId": "reportevent",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Report event object that will be added to the current list of events",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/EventReport"
-            }
-          }
+        "consumes": [
+          "application/json"
         ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [{
+          "in": "body",
+          "name": "body",
+          "description": "Report event object that will be added to the current list of events",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/EventReport"
+          }
+        }],
         "responses": {
           "200": {
-            "description": "successful operation"
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "eventId": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
     },
     "/respondtoevent": {
       "post": {
-        "tags": ["report"],
+        "tags": [
+          "report"
+        ],
         "summary": "Confirm or dismiss an Event report",
         "description": "Confirms or Dismisses an event. The eventActive property should be a 1 for confirm and a 0 for dismiss.",
         "operationId": "respondtoevent",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Report event object that will be added to the current list of events",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "eventId": {
-                  "type": "string"
-                },
-                "userToken": {
-                  "type": "string"
-                },
-                "eventActive": {
-                  "type": "integer"
-                }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [{
+          "in": "body",
+          "name": "body",
+          "description": "Report event object that will be added to the current list of events",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "eventId": {
+                "type": "string"
+              },
+              "userToken": {
+                "type": "string"
+              },
+              "eventActive": {
+                "type": "integer"
               }
             }
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -110,28 +132,32 @@
     },
     "/vieweventdetails": {
       "get": {
-        "tags": ["event"],
+        "tags": [
+          "event"
+        ],
         "summary": "Get Event details",
         "description": "Gets details about a reported event.",
         "operationId": "vieweventdetails",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Event ID to see associated details",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "eventId": {
-                  "type": "string"
-                }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [{
+          "in": "body",
+          "name": "body",
+          "description": "Event ID to see associated details",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "eventId": {
+                "type": "string"
               }
             }
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -147,7 +173,12 @@
   "definitions": {
     "EventReport": {
       "type": "object",
-      "required": ["eventType", "userToken", "eventDesc", "coordinates"],
+      "required": [
+        "eventType",
+        "userToken",
+        "eventDesc",
+        "coordinates"
+      ],
       "properties": {
         "eventType": {
           "type": "string"
@@ -165,7 +196,10 @@
     },
     "Coordinates": {
       "type": "object",
-      "required": ["lat", "lon"],
+      "required": [
+        "lat",
+        "lon"
+      ],
       "properties": {
         "lat": {
           "type": "number",
@@ -206,14 +240,14 @@
           "$ref": "#/definitions/Coordinates"
         },
         "reportedDt": {
-            "type": "integer",
-            "format": "int64 (UNIX timestamp)"
+          "type": "integer",
+          "format": "int64 (UNIX timestamp)"
         },
         "confirms": {
-            "type": "integer"
+          "type": "integer"
         },
         "dismisses": {
-            "type": "integer"
+          "type": "integer"
         }
       }
     }
