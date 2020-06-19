@@ -18,8 +18,8 @@ async function insertEvent(args) {
         ps.input("eventType", sql.NVarChar);
         ps.input("userToken", sql.NVarChar);
         ps.input("eventDesc", sql.NVarChar);
-        ps.input("lat", sql.Decimal);
-        ps.input("lon", sql.Decimal);
+        ps.input("lat", sql.Decimal(8, 5));
+        ps.input("lon", sql.Decimal(8, 5));
         ps.input("reportedDt", sql.BigInt);
         await ps.prepare(sqlQuery)
         results = await ps.execute(args);
@@ -55,11 +55,18 @@ module.exports = async function (context, req) {
         });
     } catch (err) {
         context.res = {
-            status: 500,
-            body: {
+            status: 500
+        };
+        if (err.number = 547) {
+            context.res.body = {
+                error: "Unable to add event. Invalid Event Type."
+            };
+        } else {
+            context.res.body = {
                 error: "Internal error"
-            }
+            };
         }
+        return;
     }
 
     context.res = {

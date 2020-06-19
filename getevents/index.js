@@ -1,16 +1,114 @@
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+const sql = require("mssql");
 
-    if (req.query.name || (req.body && req.body.name)) {
-        context.res = {
-            // status: 200, /* Defaults to 200 */
-            body: "Hello " + (req.query.name || req.body.name)
-        };
-    }
-    else {
+const sqlConfig = {
+    user: process.env.dbuser,
+    password: process.env.dbpassword,
+    server: process.env.dbserver,
+    database: process.env.database,
+};
+
+async function fetchEvents(args) {
+    const {
+        radius,
+        userToken,
+        lat,
+        lon
+    } = args;
+
+    const query = `
+        SELECT * FROM [dbo].[GetEvents] (@lat, @lon, @radius, @userToken)
+    `;
+    const pool = await sql.connect(sqlConfig);
+    const ps = new sql.PreparedStatement(pool);
+    ps.input("lat", sql.Decimal(8, 5));
+    ps.input("lon", sql.Decimal(8, 5));
+    ps.input("radius", sql.Int);
+    ps.input("userToken", sql.NVarChar(255));
+    await ps.prepare(query);
+    const results = await ps.execute({
+        lat,
+        lon,
+        radius,
+        userToken
+    });
+
+    return results.recordset;
+}
+
+function checkParams(args, context) {
+    const {
+        radius,
+        userToken,
+        lat,
+        lon
+    } = args;
+
+    if (radius <= 0 || isNaN(Number(radius))) {
         context.res = {
             status: 400,
-            body: "Please pass a name on the query string or in the request body"
+            body: {
+                message: "Radius must be a positive number"
+            }
         };
+        return false;
+    }
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+        context.res = {
+            status: 400,
+            body: {
+                message: "Coordinates out of range"
+            }
+        };
+        return false;
+    }
+    if (!userToken) {
+        context.res = {
+            status: 400,
+            body: {
+                message: "No userToken provided"
+            }
+        };
+        return false;
+    }
+    return true;
+}
+
+module.exports = async function (context, req) {
+    const radius = req.query.radius || (req.body ? req.body.radius : null);
+    const userToken = req.query.userToken || (req.body ? req.body.userToken : null);
+    const {
+        lat,
+        lon
+    } = req.body.coordinates;
+    const params = {
+        lat,
+        lon,
+        radius,
+        userToken
+    };
+    if (!checkParams(params, context)) {
+        return;
+    }
+
+    let dbResults = await fetchEvents(params);
+
+    dbResuls = dbResults.map((event) => {
+        if (event.lat) {
+            event.coordinates = {
+                lat: event.lat,
+                lon: event.lon
+            };
+            delete event.lat;
+            delete event.lon;
+        }
+        return event;
+    })
+
+    context.res = {
+        status: 200,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dbResults)
     }
 };

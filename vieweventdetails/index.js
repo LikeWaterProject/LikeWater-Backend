@@ -10,11 +10,10 @@ const sqlConfig = {
 async function fetchEventDetails(eventId) {
     const query = `
         select Events.eventId, Events.eventType, Events.userToken, Events.eventDesc, Events.lat, Events.lon, Events.reportedDt,
-        SUM(CASE WHEN [EventResponses].[reportedActive] = 1 THEN 1 ELSE 0 END) as confirms, 
-        SUM(CASE WHEN [EventResponses].[reportedActive] = 0 THEN 1 ELSE 0 END) as dismisses 
+        SUM(CASE WHEN [EventResponses].[reportedActive] = 1 THEN 1 ELSE 0 END) over (partition by Events.eventId) confirms, 
+        SUM(CASE WHEN [EventResponses].[reportedActive] = 0 THEN 1 ELSE 0 END) over (partition by Events.eventId) dismisses 
         from Events left join EventResponses on Events.eventId = EventResponses.eventId
-        WHERE Events.eventId = @eventId
-        GROUP BY Events.eventId, Events.eventType, Events.userToken, Events.eventDesc, Events.lat, Events.lon, Events.reportedDt;
+        WHERE Events.eventId = @eventId;
     `;
     let record;
     try {
