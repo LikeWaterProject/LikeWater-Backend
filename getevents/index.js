@@ -92,7 +92,7 @@ module.exports = async function (context, req) {
 
     let dbResults = await fetchEvents(params);
 
-    dbResuls = dbResults.map((event) => {
+    dbResults = dbResults.map((event) => {
         if (event.lat) {
             event.coordinates = {
                 lat: event.lat,
