@@ -16,7 +16,7 @@ async function fetchEvents(args) {
     } = args;
 
     const query = `
-        SELECT * FROM [dbo].[GetEvents] (@lat, @lon, @radius, @userToken)
+        SELECT *, ISNULL([GetEvents].confirmCount, 0) as confirms, ISNULL([GetEvents].dismissCount, 0) as dismisses FROM [dbo].[GetEvents] (@lat, @lon, @radius, @userToken)
     `;
     const pool = await sql.connect(sqlConfig);
     const ps = new sql.PreparedStatement(pool);
@@ -31,6 +31,7 @@ async function fetchEvents(args) {
         radius,
         userToken
     });
+    ps.unprepare();
 
     return results.recordset;
 }
@@ -43,7 +44,7 @@ function checkParams(args, context) {
         lon
     } = args;
 
-    if (radius <= 0 || isNaN(Number(radius))) {
+    if (radius <= 0 || radius == null) {
         context.res = {
             status: 400,
             body: {
@@ -93,7 +94,7 @@ module.exports = async function (context, req) {
     let dbResults = await fetchEvents(params);
 
     dbResults = dbResults.map((event) => {
-        if (event.lat) {
+        if (event.lat !== null) {
             event.coordinates = {
                 lat: event.lat,
                 lon: event.lon
@@ -101,6 +102,8 @@ module.exports = async function (context, req) {
             delete event.lat;
             delete event.lon;
         }
+        delete event.confirmCount;
+        delete event.dismissCount;
         return event;
     })
 
