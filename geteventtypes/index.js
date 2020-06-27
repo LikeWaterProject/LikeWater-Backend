@@ -8,14 +8,12 @@ const sqlConfig = {
 };
 
 async function getSqlData() {
-  let sqlQuery = `select eventCategory, eventType, description from EventTypes where showInApp = 1 order by eventCategory, eventType`;
+  let sqlQuery = `select eventCategory, eventType from EventTypes where showInApp = 1 order by eventCategory, eventType`;
 
   let pool = await sql.connect(sqlConfig)
 
   let result = await pool.request()
     .query(sqlQuery);
-
-  // console.dir(result1)
 
   return result.recordset;
 
@@ -23,12 +21,24 @@ async function getSqlData() {
 
 module.exports = async function (context, req) {
   dbResults = await getSqlData();
+  categories = {};
+  dbResults.map(({
+    eventCategory,
+    eventType
+  }) => {
+    if (!categories[eventCategory]) {
+      categories[eventCategory] = [];
+    }
+    categories[eventCategory].push(eventType);
+  });
+
+
 
   context.res = {
     status: 200,
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(dbResults)
+    body: JSON.stringify(categories)
   }
 };
