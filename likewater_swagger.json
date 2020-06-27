@@ -60,15 +60,17 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [{
-          "in": "body",
-          "name": "body",
-          "description": "Report event object that will be added to the current list of events",
-          "required": true,
-          "schema": {
-            "$ref": "#/definitions/EventReport"
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Report event object that will be added to the current list of events",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EventReport"
+            }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -98,26 +100,28 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [{
-          "in": "body",
-          "name": "body",
-          "description": "Report event object that will be added to the current list of events",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "eventId": {
-                "type": "string"
-              },
-              "userToken": {
-                "type": "string"
-              },
-              "eventActive": {
-                "type": "integer"
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Report event object that will be added to the current list of events",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "eventId": {
+                  "type": "string"
+                },
+                "userToken": {
+                  "type": "string"
+                },
+                "eventActive": {
+                  "type": "integer"
+                }
               }
             }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -147,20 +151,22 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [{
-          "in": "body",
-          "name": "body",
-          "description": "Event ID to see associated details",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "eventId": {
-                "type": "string"
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Event ID to see associated details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "eventId": {
+                  "type": "string"
+                }
               }
             }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -177,12 +183,16 @@
     "EventReport": {
       "type": "object",
       "required": [
+        "eventCategory",
         "eventType",
         "userToken",
         "eventDesc",
         "coordinates"
       ],
       "properties": {
+        "eventCategory": {
+          "type": "string"
+        },
         "eventType": {
           "type": "string"
         },

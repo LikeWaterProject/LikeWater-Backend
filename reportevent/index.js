@@ -7,15 +7,16 @@ const sqlConfig = {
     database: process.env.database,
 };
 async function insertEvent(args) {
-    const sqlQuery = `INSERT INTO Events (eventId, eventType, userToken, eventDesc, lat, lon, reportedDt) 
+    const sqlQuery = `INSERT INTO Events (eventId, eventType, eventCategory, userToken, eventDesc, lat, lon, reportedDt) 
     OUTPUT Inserted.eventId
-    VALUES (newId(), @eventType, @userToken, @eventDesc, @lat, @lon, @reportedDt)
+    VALUES (newId(), @eventType, @eventCategory, @userToken, @eventDesc, @lat, @lon, @reportedDt)
     `;
     let results;
     try {
         const pool = await sql.connect(sqlConfig)
         const ps = new sql.PreparedStatement(pool);
         ps.input("eventType", sql.NVarChar);
+        ps.input("eventCategory", sql.NVarChar);
         ps.input("userToken", sql.NVarChar);
         ps.input("eventDesc", sql.NVarChar);
         ps.input("lat", sql.Decimal(8, 5));
@@ -37,6 +38,7 @@ async function insertEvent(args) {
 module.exports = async function (context, req) {
     const {
         eventType,
+        eventCategory,
         userToken,
         eventDesc,
         coordinates,
@@ -47,6 +49,7 @@ module.exports = async function (context, req) {
     try {
         results = await insertEvent({
             eventType,
+            eventCategory,
             userToken,
             eventDesc,
             lat: coordinates.lat,
