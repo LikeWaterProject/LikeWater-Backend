@@ -176,6 +176,58 @@
           }
         }
       }
+    },
+    "/getevents": {
+      "get": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Get Event list of active events",
+        "description": "Gets active events based on user location and radius.",
+        "operationId": "getevents",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Event ID to see associated details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "radius": {
+                  "type": "integer"
+                },
+                "userToken": {
+                  "type": "string"
+                },
+                "lat": {
+                  "type": "number"
+                },
+                "lon": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EventDetails"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {},
@@ -229,6 +281,7 @@
       "required": [
         "eventId",
         "eventType",
+        "eventCategory",
         "userToken",
         "eventDesc",
         "coordinates",
@@ -241,6 +294,9 @@
           "type": "string"
         },
         "eventType": {
+          "type": "string"
+        },
+        "eventCategory": {
           "type": "string"
         },
         "userToken": {
